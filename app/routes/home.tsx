@@ -3,9 +3,12 @@ import { motion } from "framer-motion";
 import {
   Bookmark,
   BookmarkCheck,
+  Brain,
   Check,
   Clock,
+  Dumbbell,
   Flame,
+  Gauge,
   Heart,
   ListChecks,
   Lock,
@@ -24,6 +27,8 @@ import {
   User,
 } from "lucide-react";
 
+type GoalType = "balanced" | "lean" | "muscle" | "comfort";
+
 type Meal = {
   name: string;
   mood: "lazy" | "productive" | "comfort";
@@ -32,10 +37,21 @@ type Meal = {
   time: string;
   vibe: string;
   calories: number;
+  protein: number;
+  fiber: number;
+  prepEffort: 1 | 2 | 3;
+  goalTags: GoalType[];
+  pantryTags: string[];
   imageUrl: string;
   imageAlt: string;
   ingredients: string[];
   steps: string[];
+};
+
+type ScoredMeal = {
+  meal: Meal;
+  reasons: string[];
+  score: number;
 };
 
 type MealLogEntry = {
@@ -60,6 +76,11 @@ const meals: Meal[] = [
     time: "15 min",
     vibe: "warm, quick, comforting",
     calories: 520,
+    protein: 22,
+    fiber: 4,
+    prepEffort: 1,
+    goalTags: ["balanced", "comfort"],
+    pantryTags: ["leftovers", "eggs", "rice", "quick"],
     imageUrl:
       "https://unsplash.com/photos/IlJhW2ScTqw/download?force=true&w=900",
     imageAlt: "Spicy egg rice bowl with greens",
@@ -79,6 +100,11 @@ const meals: Meal[] = [
     time: "10 min",
     vibe: "clean, filling, cafe-style",
     calories: 430,
+    protein: 28,
+    fiber: 8,
+    prepEffort: 1,
+    goalTags: ["lean", "muscle", "balanced"],
+    pantryTags: ["salmon", "avocado", "toast", "quick"],
     imageUrl:
       "https://unsplash.com/photos/pqLvZPEBrGU/download?force=true&w=900",
     imageAlt: "Avocado toast topped with salmon",
@@ -98,6 +124,11 @@ const meals: Meal[] = [
     time: "20 min",
     vibe: "cozy, creamy, dinner energy",
     calories: 610,
+    protein: 17,
+    fiber: 5,
+    prepEffort: 2,
+    goalTags: ["comfort"],
+    pantryTags: ["pasta", "tomato", "butter", "creamy"],
     imageUrl:
       "https://unsplash.com/photos/TmJPvlcfn_0/download?force=true&w=900",
     imageAlt: "Creamy tomato pasta in a bowl",
@@ -117,6 +148,11 @@ const meals: Meal[] = [
     time: "12 min",
     vibe: "high-protein, quick, spicy",
     calories: 390,
+    protein: 31,
+    fiber: 3,
+    prepEffort: 1,
+    goalTags: ["lean", "muscle"],
+    pantryTags: ["eggs", "spinach", "protein", "quick"],
     imageUrl:
       "https://unsplash.com/photos/oROd_EB2vD8/download?force=true&w=900",
     imageAlt: "High protein egg bowl with spinach",
@@ -136,6 +172,11 @@ const meals: Meal[] = [
     time: "15 min",
     vibe: "easy, cozy, buttery",
     calories: 560,
+    protein: 14,
+    fiber: 3,
+    prepEffort: 1,
+    goalTags: ["comfort"],
+    pantryTags: ["noodles", "butter", "parmesan", "lazy"],
     imageUrl:
       "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Butter noodles with parmesan",
@@ -155,6 +196,11 @@ const meals: Meal[] = [
     time: "20 min",
     vibe: "clean, filling, meal-prep friendly",
     calories: 590,
+    protein: 38,
+    fiber: 7,
+    prepEffort: 2,
+    goalTags: ["muscle", "balanced"],
+    pantryTags: ["salmon", "rice", "avocado", "meal prep"],
     imageUrl:
       "https://unsplash.com/photos/Mwtmk37_0S4/download?force=true&w=900",
     imageAlt: "Salmon rice bowl with avocado",
@@ -174,6 +220,11 @@ const meals: Meal[] = [
     time: "18 min",
     vibe: "soft, cozy, simple",
     calories: 470,
+    protein: 18,
+    fiber: 4,
+    prepEffort: 1,
+    goalTags: ["balanced", "comfort"],
+    pantryTags: ["rice", "egg", "spinach", "simple"],
     imageUrl:
       "https://unsplash.com/photos/IlJhW2ScTqw/download?force=true&w=900",
     imageAlt: "Simple egg rice bowl",
@@ -193,6 +244,11 @@ const meals: Meal[] = [
     time: "10 min",
     vibe: "fresh, low effort, filling",
     calories: 510,
+    protein: 16,
+    fiber: 10,
+    prepEffort: 1,
+    goalTags: ["lean", "balanced"],
+    pantryTags: ["avocado", "rice", "egg", "fresh"],
     imageUrl:
       "https://unsplash.com/photos/rNriCVGMVgQ/download?force=true&w=900",
     imageAlt: "Avocado rice bowl with egg",
@@ -212,6 +268,11 @@ const meals: Meal[] = [
     time: "18 min",
     vibe: "spicy, garlicky, cozy",
     calories: 640,
+    protein: 19,
+    fiber: 5,
+    prepEffort: 2,
+    goalTags: ["comfort"],
+    pantryTags: ["pasta", "garlic", "chili oil", "parmesan"],
     imageUrl:
       "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Spicy garlic pasta with parmesan",
@@ -231,6 +292,11 @@ const meals: Meal[] = [
     time: "5 min",
     vibe: "fresh, sweet, protein-packed",
     calories: 320,
+    protein: 24,
+    fiber: 8,
+    prepEffort: 1,
+    goalTags: ["lean", "muscle"],
+    pantryTags: ["yogurt", "berries", "granola", "breakfast"],
     imageUrl:
       "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Greek yogurt bowl with berries",
@@ -250,6 +316,11 @@ const meals: Meal[] = [
     time: "15 min",
     vibe: "portable, filling, lunch-ready",
     calories: 540,
+    protein: 36,
+    fiber: 9,
+    prepEffort: 2,
+    goalTags: ["muscle", "balanced"],
+    pantryTags: ["chicken", "wrap", "avocado", "lunch"],
     imageUrl:
       "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Chicken wrap with vegetables",
@@ -269,6 +340,11 @@ const meals: Meal[] = [
     time: "25 min",
     vibe: "warm, nourishing, simple",
     calories: 410,
+    protein: 21,
+    fiber: 14,
+    prepEffort: 3,
+    goalTags: ["lean", "comfort"],
+    pantryTags: ["lentils", "soup", "broth", "vegetarian"],
     imageUrl:
       "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Bowl of lentil soup",
@@ -288,6 +364,11 @@ const meals: Meal[] = [
     time: "10 min",
     vibe: "crunchy, spicy, no-cook",
     calories: 360,
+    protein: 29,
+    fiber: 4,
+    prepEffort: 1,
+    goalTags: ["lean", "muscle"],
+    pantryTags: ["tuna", "cucumber", "rice", "no cook"],
     imageUrl:
       "https://images.unsplash.com/photo-1563612116625-3012372fccce?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Tuna bowl with cucumber",
@@ -307,6 +388,11 @@ const meals: Meal[] = [
     time: "18 min",
     vibe: "herby, satisfying, pantry-friendly",
     calories: 580,
+    protein: 24,
+    fiber: 10,
+    prepEffort: 2,
+    goalTags: ["balanced", "comfort"],
+    pantryTags: ["pasta", "pesto", "chickpeas", "pantry"],
     imageUrl:
       "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Pesto pasta with chickpeas",
@@ -326,6 +412,11 @@ const meals: Meal[] = [
     time: "20 min",
     vibe: "saucy, plant-based, filling",
     calories: 620,
+    protein: 30,
+    fiber: 9,
+    prepEffort: 2,
+    goalTags: ["muscle", "balanced"],
+    pantryTags: ["tofu", "rice", "peanut sauce", "plant based"],
     imageUrl:
       "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Tofu rice bowl with vegetables",
@@ -342,6 +433,7 @@ const meals: Meal[] = [
 const moods = ["all", "lazy", "productive", "comfort"] as const;
 const spiceLevels = ["all", "mild", "medium", "spicy"] as const;
 const styles = ["all", "healthy", "balanced", "comfort"] as const;
+const goals = ["balanced", "lean", "muscle", "comfort"] as const;
 
 type MoodFilter = (typeof moods)[number];
 type SpiceFilter = (typeof spiceLevels)[number];
@@ -357,6 +449,107 @@ function normalizeTerms(value: string) {
     .split(/[\s,]+/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function getRemainingCalories(totalCalories: number, calorieGoal: number) {
+  return Math.max(calorieGoal - totalCalories, 0);
+}
+
+function scoreMeal({
+  calorieGoal,
+  ingredientsInput,
+  meal,
+  mood,
+  savedRecipeNames,
+  spice,
+  style,
+  totalCalories,
+  userGoal,
+}: {
+  calorieGoal: number;
+  ingredientsInput: string;
+  meal: Meal;
+  mood: MoodFilter;
+  savedRecipeNames: string[];
+  spice: SpiceFilter;
+  style: StyleFilter;
+  totalCalories: number;
+  userGoal: GoalType;
+}): ScoredMeal {
+  const userIngredients = normalizeTerms(ingredientsInput);
+  const ingredientText = `${meal.ingredients.join(" ")} ${meal.pantryTags.join(
+    " ",
+  )}`.toLowerCase();
+  const ingredientMatches = userIngredients.filter((ingredient) =>
+    ingredientText.includes(ingredient),
+  );
+  const remainingCalories = getRemainingCalories(totalCalories, calorieGoal);
+  const reasons: string[] = [];
+  let score = 35;
+
+  if (mood !== "all" && meal.mood === mood) {
+    score += 14;
+    reasons.push(`matches your ${mood} mood`);
+  }
+
+  if (spice !== "all" && meal.spice === spice) {
+    score += 10;
+    reasons.push(`${spice} spice preference`);
+  }
+
+  if (style !== "all" && meal.style === style) {
+    score += 10;
+    reasons.push(`${style} food style`);
+  }
+
+  if (meal.goalTags.includes(userGoal)) {
+    score += 16;
+    reasons.push(`${userGoal} goal fit`);
+  }
+
+  if (ingredientMatches.length > 0) {
+    score += Math.min(ingredientMatches.length * 9, 24);
+    reasons.push(`uses ${ingredientMatches.slice(0, 3).join(", ")}`);
+  }
+
+  if (meal.calories <= remainingCalories || remainingCalories === 0) {
+    score += 10;
+    reasons.push("fits today's calorie budget");
+  } else if (meal.calories - remainingCalories <= 150) {
+    score += 4;
+    reasons.push("close to your remaining calories");
+  }
+
+  if (userGoal === "muscle" && meal.protein >= 28) {
+    score += 10;
+    reasons.push(`${meal.protein}g protein`);
+  }
+
+  if (userGoal === "lean" && meal.calories <= 430) {
+    score += 10;
+    reasons.push("lighter calorie option");
+  }
+
+  if (userGoal === "comfort" && meal.mood === "comfort") {
+    score += 8;
+    reasons.push("comfort-forward pick");
+  }
+
+  if (meal.prepEffort === 1) {
+    score += 5;
+    reasons.push("low prep effort");
+  }
+
+  if (savedRecipeNames.includes(meal.name)) {
+    score += 4;
+    reasons.push("already in saved recipes");
+  }
+
+  return {
+    meal,
+    reasons: reasons.slice(0, 4),
+    score: Math.min(score, 99),
+  };
 }
 
 function readStoredArray<T>(key: string): T[] {
@@ -405,6 +598,8 @@ function Pill({
 }
 
 function MealCard({
+  aiReasons = [],
+  aiScore,
   isDarkMode,
   isSaved,
   isRecentlyLogged,
@@ -413,6 +608,8 @@ function MealCard({
   onLog,
   onToggleSaved,
 }: {
+  aiReasons?: string[];
+  aiScore?: number;
   isDarkMode: boolean;
   isSaved: boolean;
   isRecentlyLogged: boolean;
@@ -453,6 +650,11 @@ function MealCard({
           </div>
 
           <div className="flex shrink-0 flex-col items-end gap-2">
+            {typeof aiScore === "number" && (
+              <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-950">
+                <Brain size={14} /> {aiScore}% AI match
+              </div>
+            )}
             <div
               className={cx(
                 "flex items-center gap-1 rounded-full px-3 py-1 text-sm",
@@ -471,6 +673,30 @@ function MealCard({
             </div>
           </div>
         </div>
+
+        {aiReasons.length > 0 && (
+          <div
+            className={cx(
+              "mt-5 rounded-2xl border p-4",
+              isDarkMode ? "border-neutral-800" : "border-neutral-200",
+            )}
+          >
+            <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+              <Brain size={16} />
+              Why it matched
+            </p>
+            <ul
+              className={cx(
+                "space-y-1 text-sm",
+                isDarkMode ? "text-neutral-300" : "text-neutral-600",
+              )}
+            >
+              {aiReasons.map((reason) => (
+                <li key={reason}>- {reason}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="mt-5 flex flex-wrap gap-2">
           <span className="rounded-full bg-rose-100 px-3 py-1 text-sm text-rose-950">
@@ -521,6 +747,23 @@ function MealCard({
         </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <div
+            className={cx(
+              "rounded-2xl border p-4 md:col-span-2",
+              isDarkMode ? "border-neutral-800" : "border-neutral-200",
+            )}
+          >
+            <h4 className="mb-3 flex items-center gap-2 font-semibold">
+              <Gauge size={16} />
+              Nutrition model
+            </h4>
+            <div className="grid gap-2 text-sm sm:grid-cols-3">
+              <span>Protein: {meal.protein}g</span>
+              <span>Fiber: {meal.fiber}g</span>
+              <span>Prep effort: {meal.prepEffort}/3</span>
+            </div>
+          </div>
+
           <div>
             <h4 className="mb-2 flex items-center gap-2 font-semibold">
               <Salad size={16} />
@@ -765,6 +1008,81 @@ function TrackerPanel({
   );
 }
 
+function AIRecommendationPanel({
+  isDarkMode,
+  recommendation,
+  remainingCalories,
+  userGoal,
+}: {
+  isDarkMode: boolean;
+  recommendation: ScoredMeal;
+  remainingCalories: number;
+  userGoal: GoalType;
+}) {
+  return (
+    <section
+      className={cx(
+        "mt-8 rounded-3xl p-6 shadow-xl",
+        isDarkMode ? "bg-neutral-900" : "bg-white",
+      )}
+    >
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-950">
+            <Brain size={16} />
+            AI recommendation engine
+          </div>
+          <h2 className="text-3xl font-bold">{recommendation.meal.name}</h2>
+          <p
+            className={cx(
+              "mt-2 max-w-2xl",
+              isDarkMode ? "text-neutral-300" : "text-neutral-600",
+            )}
+          >
+            Ranked from the recipe database using mood, pantry matches, goal
+            tags, protein, prep effort, and remaining calories.
+          </p>
+        </div>
+
+        <div
+          className={cx(
+            "rounded-2xl border p-4",
+            isDarkMode ? "border-neutral-800" : "border-neutral-200",
+          )}
+        >
+          <p className="flex items-center gap-2 text-sm font-semibold">
+            <Target size={16} />
+            Goal model
+          </p>
+          <p className="mt-2 text-3xl font-bold">{recommendation.score}%</p>
+          <p
+            className={cx(
+              "mt-1 text-sm",
+              isDarkMode ? "text-neutral-400" : "text-neutral-500",
+            )}
+          >
+            {userGoal} goal | approx {remainingCalories} cal left
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-4">
+        {recommendation.reasons.map((reason) => (
+          <div
+            key={reason}
+            className={cx(
+              "rounded-2xl border p-4 text-sm",
+              isDarkMode ? "border-neutral-800" : "border-neutral-200",
+            )}
+          >
+            {reason}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function LoginPage({
   calorieGoalInput,
   loginError,
@@ -939,6 +1257,7 @@ export default function Home() {
   const [recentlySavedRecipe, setRecentlySavedRecipe] = useState("");
   const [savedRecipeNames, setSavedRecipeNames] = useState<string[]>([]);
   const [loggedMeals, setLoggedMeals] = useState<MealLogEntry[]>([]);
+  const [userGoal, setUserGoal] = useState<GoalType>("balanced");
 
   useEffect(() => {
     setSavedRecipeNames(readStoredArray<string>(savedRecipesKey));
@@ -1034,6 +1353,42 @@ export default function Home() {
     () => loggedMeals.reduce((total, meal) => total + meal.calories, 0),
     [loggedMeals],
   );
+
+  const scoredMeals = useMemo(
+    () =>
+      meals
+        .map((meal) =>
+          scoreMeal({
+            calorieGoal,
+            ingredientsInput,
+            meal,
+            mood,
+            savedRecipeNames,
+            spice,
+            style,
+            totalCalories,
+            userGoal,
+          }),
+        )
+        .sort((a, b) => b.score - a.score),
+    [
+      calorieGoal,
+      ingredientsInput,
+      mood,
+      savedRecipeNames,
+      spice,
+      style,
+      totalCalories,
+      userGoal,
+    ],
+  );
+
+  const scoredMealMap = useMemo(() => {
+    return new Map(scoredMeals.map((entry) => [entry.meal.name, entry]));
+  }, [scoredMeals]);
+
+  const topRecommendation = scoredMeals[0];
+  const remainingCalories = getRemainingCalories(totalCalories, calorieGoal);
 
   function surpriseMe() {
     const randomMeal = meals[Math.floor(Math.random() * meals.length)];
@@ -1225,6 +1580,8 @@ export default function Home() {
             </div>
             <MealCard
               meal={featuredMeal}
+              aiReasons={scoredMealMap.get(featuredMeal.name)?.reasons}
+              aiScore={scoredMealMap.get(featuredMeal.name)?.score}
               isDarkMode={isDarkMode}
               isSaved={savedRecipeNames.includes(featuredMeal.name)}
               isRecentlyLogged={recentlyLoggedMeal === featuredMeal.name}
@@ -1289,6 +1646,26 @@ export default function Home() {
 
           <div className="space-y-5">
             <div>
+              <p className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                <Dumbbell size={15} />
+                Goal
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {goals.map((item) => (
+                  <Pill
+                    key={item}
+                    active={userGoal === item}
+                    isDarkMode={isDarkMode}
+                    onClick={() => setUserGoal(item)}
+                  >
+                    {item}
+                  </Pill>
+                ))}
+              </div>
+            </div>
+
+            <div>
               <p className="mb-2 text-sm font-semibold">Mood</p>
 
               <div className="flex flex-wrap gap-2">
@@ -1344,6 +1721,15 @@ export default function Home() {
           </div>
         </section>
 
+        {topRecommendation && (
+          <AIRecommendationPanel
+            isDarkMode={isDarkMode}
+            recommendation={topRecommendation}
+            remainingCalories={remainingCalories}
+            userGoal={userGoal}
+          />
+        )}
+
         <TrackerPanel
           calorieGoal={calorieGoal}
           isDarkMode={isDarkMode}
@@ -1360,6 +1746,8 @@ export default function Home() {
               <MealCard
                 key={meal.name}
                 meal={meal}
+                aiReasons={scoredMealMap.get(meal.name)?.reasons}
+                aiScore={scoredMealMap.get(meal.name)?.score}
                 isDarkMode={isDarkMode}
                 isSaved={savedRecipeNames.includes(meal.name)}
                 isRecentlyLogged={recentlyLoggedMeal === meal.name}
