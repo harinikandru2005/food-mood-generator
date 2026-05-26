@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   Flame,
@@ -9,9 +9,22 @@ import {
   Search,
   Shuffle,
   Heart,
+  ShoppingBasket,
 } from "lucide-react";
 
-const meals = [
+type Meal = {
+  name: string;
+  mood: "lazy" | "productive" | "comfort";
+  spice: "mild" | "medium" | "spicy";
+  style: "healthy" | "balanced" | "comfort";
+  time: string;
+  vibe: string;
+  ingredients: string[];
+  steps: string[];
+  icon: string;
+};
+
+const meals: Meal[] = [
   {
     name: "Spicy Egg Rice Bowl",
     mood: "lazy",
@@ -22,7 +35,7 @@ const meals = [
     ingredients: ["rice", "eggs", "chili oil", "spinach", "soy sauce"],
     steps: [
       "Warm leftover rice in a pan.",
-      "Scramble or fry 1–2 eggs.",
+      "Scramble or fry 1-2 eggs.",
       "Add spinach until it wilts.",
       "Top with chili oil and soy sauce.",
     ],
@@ -158,18 +171,31 @@ const meals = [
   },
 ];
 
-const moods = ["all", "lazy", "productive", "comfort"];
-const spiceLevels = ["all", "mild", "medium", "spicy"];
-const styles = ["all", "healthy", "balanced", "comfort"];
+const moods = ["all", "lazy", "productive", "comfort"] as const;
+const spiceLevels = ["all", "mild", "medium", "spicy"] as const;
+const styles = ["all", "healthy", "balanced", "comfort"] as const;
 
-function Pill({ active, children, onClick }: any) {
+type MoodFilter = (typeof moods)[number];
+type SpiceFilter = (typeof spiceLevels)[number];
+type StyleFilter = (typeof styles)[number];
+
+function Pill({
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: ReactNode;
+  onClick: () => void;
+}) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`rounded-full px-4 py-2 text-sm transition border ${
+      className={`rounded-full border px-4 py-2 text-sm transition ${
         active
-          ? "bg-black text-white border-black shadow"
-          : "bg-white text-neutral-700 border-neutral-200 hover:border-neutral-400"
+          ? "border-black bg-black text-white shadow"
+          : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400"
       }`}
     >
       {children}
@@ -177,7 +203,7 @@ function Pill({ active, children, onClick }: any) {
   );
 }
 
-function MealCard({ meal }: any) {
+function MealCard({ meal }: { meal: Meal }) {
   return (
     <motion.div
       layout
@@ -187,12 +213,12 @@ function MealCard({ meal }: any) {
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-4xl mb-3">{meal.icon}</div>
+          <div className="mb-3 text-4xl">{meal.icon}</div>
           <h3 className="text-2xl font-bold">{meal.name}</h3>
           <p className="mt-1 text-neutral-500">{meal.vibe}</p>
         </div>
 
-        <div className="flex items-center gap-1 rounded-full bg-neutral-100 px-3 py-1 text-sm">
+        <div className="flex shrink-0 items-center gap-1 rounded-full bg-neutral-100 px-3 py-1 text-sm">
           <Clock size={14} /> {meal.time}
         </div>
       </div>
@@ -217,7 +243,7 @@ function MealCard({ meal }: any) {
           </h4>
 
           <ul className="space-y-1 text-sm text-neutral-600">
-            {meal.ingredients.map((item: string) => (
+            {meal.ingredients.map((item) => (
               <li key={item}>• {item}</li>
             ))}
           </ul>
@@ -230,7 +256,7 @@ function MealCard({ meal }: any) {
           </h4>
 
           <ol className="space-y-1 text-sm text-neutral-600">
-            {meal.steps.map((step: string, index: number) => (
+            {meal.steps.map((step, index) => (
               <li key={step}>
                 {index + 1}. {step}
               </li>
@@ -242,27 +268,45 @@ function MealCard({ meal }: any) {
   );
 }
 
+function normalizeTerms(value: string) {
+  return value
+    .toLowerCase()
+    .split(/[\s,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export default function Home() {
-  const [mood, setMood] = useState("all");
-  const [spice, setSpice] = useState("all");
-  const [style, setStyle] = useState("all");
+  const [mood, setMood] = useState<MoodFilter>("all");
+  const [spice, setSpice] = useState<SpiceFilter>("all");
+  const [style, setStyle] = useState<StyleFilter>("all");
   const [query, setQuery] = useState("");
+  const [ingredientsInput, setIngredientsInput] = useState("");
   const [featuredMeal, setFeaturedMeal] = useState(meals[0]);
 
   const filteredMeals = useMemo(() => {
-    const searchText = query.toLowerCase();
+    const searchText = query.trim().toLowerCase();
+    const userIngredients = normalizeTerms(ingredientsInput);
 
     const exactMatches = meals.filter((meal) => {
       const matchesMood = mood === "all" || meal.mood === mood;
       const matchesSpice = spice === "all" || meal.spice === spice;
       const matchesStyle = style === "all" || meal.style === style;
-
       const searchable =
         `${meal.name} ${meal.ingredients.join(" ")} ${meal.vibe}`.toLowerCase();
+      const matchesQuery = !searchText || searchable.includes(searchText);
+      const ingredientText = meal.ingredients.join(" ").toLowerCase();
+      const matchesIngredients =
+        userIngredients.length === 0 ||
+        userIngredients.some((ingredient) => ingredientText.includes(ingredient));
 
-      const matchesQuery = searchable.includes(searchText);
-
-      return matchesMood && matchesSpice && matchesStyle && matchesQuery;
+      return (
+        matchesMood &&
+        matchesSpice &&
+        matchesStyle &&
+        matchesQuery &&
+        matchesIngredients
+      );
     });
 
     if (exactMatches.length > 0) {
@@ -273,15 +317,18 @@ export default function Home() {
       const matchesMood = mood === "all" || meal.mood === mood;
       const matchesSpice = spice === "all" || meal.spice === spice;
       const matchesStyle = style === "all" || meal.style === style;
-
-      const score =
+      const ingredientText = meal.ingredients.join(" ").toLowerCase();
+      const ingredientScore = userIngredients.filter((ingredient) =>
+        ingredientText.includes(ingredient),
+      ).length;
+      const filterScore =
         Number(matchesMood) + Number(matchesSpice) + Number(matchesStyle);
 
-      return score >= 2;
+      return filterScore >= 2 || ingredientScore > 0;
     });
 
-    return fallbackMatches.length > 0 ? fallbackMatches : meals;
-  }, [mood, spice, style, query]);
+    return fallbackMatches;
+  }, [mood, spice, style, query, ingredientsInput]);
 
   function surpriseMe() {
     const randomMeal = meals[Math.floor(Math.random() * meals.length)];
@@ -289,7 +336,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-orange-50 text-neutral-900 p-6">
+    <main className="min-h-screen bg-orange-50 p-6 text-neutral-900">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 grid gap-6 lg:grid-cols-2 lg:items-center">
           <div>
@@ -298,7 +345,7 @@ export default function Home() {
               Midnight Meals
             </div>
 
-            <h1 className="text-6xl font-bold leading-tight">
+            <h1 className="text-5xl font-bold leading-tight md:text-6xl">
               What should I eat?
             </h1>
 
@@ -308,6 +355,7 @@ export default function Home() {
             </p>
 
             <button
+              type="button"
               onClick={surpriseMe}
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-white shadow transition hover:scale-105"
             >
@@ -331,18 +379,34 @@ export default function Home() {
               <h2 className="text-3xl font-bold">Find your meal vibe</h2>
             </div>
 
-            <div className="relative w-full md:w-80">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
-                size={18}
-              />
+            <div className="grid w-full gap-3 md:w-96">
+              <div className="relative">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+                  size={18}
+                />
 
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search rice, eggs, salmon..."
-                className="w-full rounded-full border border-neutral-200 py-3 pl-10 pr-4 outline-none"
-              />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search rice, eggs, salmon..."
+                  className="w-full rounded-full border border-neutral-200 py-3 pl-10 pr-4 outline-none focus:border-neutral-500"
+                />
+              </div>
+
+              <div className="relative">
+                <ShoppingBasket
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+                  size={18}
+                />
+
+                <input
+                  value={ingredientsInput}
+                  onChange={(event) => setIngredientsInput(event.target.value)}
+                  placeholder="I have eggs, rice, spinach..."
+                  className="w-full rounded-full border border-neutral-200 py-3 pl-10 pr-4 outline-none focus:border-neutral-500"
+                />
+              </div>
             </div>
           </div>
 
@@ -401,9 +465,19 @@ export default function Home() {
         </section>
 
         <section className="mt-8 grid gap-5 lg:grid-cols-2">
-          {filteredMeals.map((meal) => (
-            <MealCard key={meal.name} meal={meal} />
-          ))}
+          {filteredMeals.length > 0 ? (
+            filteredMeals.map((meal) => (
+              <MealCard key={meal.name} meal={meal} />
+            ))
+          ) : (
+            <div className="rounded-3xl bg-white p-6 shadow-xl lg:col-span-2">
+              <h3 className="text-2xl font-bold">No close match</h3>
+              <p className="mt-2 text-neutral-600">
+                Try changing one filter or search for an ingredient like rice,
+                eggs, pasta, or salmon.
+              </p>
+            </div>
+          )}
         </section>
       </div>
     </main>
