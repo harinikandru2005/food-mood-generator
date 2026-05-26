@@ -1,10 +1,14 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
+  Bookmark,
+  BookmarkCheck,
   Clock,
   Flame,
   Heart,
+  ListChecks,
   Moon,
+  Plus,
   Salad,
   Search,
   ShoppingBasket,
@@ -12,6 +16,7 @@ import {
   Soup,
   Sparkles,
   Sun,
+  Trash2,
 } from "lucide-react";
 
 type Meal = {
@@ -21,11 +26,22 @@ type Meal = {
   style: "healthy" | "balanced" | "comfort";
   time: string;
   vibe: string;
+  calories: number;
   imageUrl: string;
   imageAlt: string;
   ingredients: string[];
   steps: string[];
 };
+
+type MealLogEntry = {
+  id: string;
+  mealName: string;
+  calories: number;
+  loggedAt: string;
+};
+
+const savedRecipesKey = "midnight-meals-saved-recipes";
+const mealLogKey = "midnight-meals-recipe-log";
 
 const meals: Meal[] = [
   {
@@ -35,9 +51,10 @@ const meals: Meal[] = [
     style: "balanced",
     time: "15 min",
     vibe: "warm, quick, comforting",
+    calories: 520,
     imageUrl:
-      "https://images.unsplash.com/photo-1607532941433-304659e8198a?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Rice bowl with egg and greens",
+      "https://source.unsplash.com/900x600/?egg-rice-bowl,spinach,chili-oil",
+    imageAlt: "Spicy egg rice bowl with greens",
     ingredients: ["rice", "eggs", "chili oil", "spinach", "soy sauce"],
     steps: [
       "Warm leftover rice in a pan.",
@@ -53,9 +70,10 @@ const meals: Meal[] = [
     style: "healthy",
     time: "10 min",
     vibe: "clean, filling, cafe-style",
+    calories: 430,
     imageUrl:
-      "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Avocado toast with toppings",
+      "https://source.unsplash.com/900x600/?salmon-avocado-toast,open-sandwich",
+    imageAlt: "Avocado toast topped with salmon",
     ingredients: ["toast", "avocado", "salmon", "lime", "pepper"],
     steps: [
       "Toast bread until crisp.",
@@ -71,8 +89,9 @@ const meals: Meal[] = [
     style: "comfort",
     time: "20 min",
     vibe: "cozy, creamy, dinner energy",
+    calories: 610,
     imageUrl:
-      "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80",
+      "https://source.unsplash.com/900x600/?creamy-tomato-pasta,bowl",
     imageAlt: "Creamy tomato pasta in a bowl",
     ingredients: ["pasta", "tomato", "cream cheese", "butter", "pepper"],
     steps: [
@@ -89,9 +108,10 @@ const meals: Meal[] = [
     style: "healthy",
     time: "12 min",
     vibe: "high-protein, quick, spicy",
+    calories: 390,
     imageUrl:
-      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Protein bowl with greens and egg",
+      "https://source.unsplash.com/900x600/?egg-breakfast-bowl,spinach",
+    imageAlt: "High protein egg bowl with spinach",
     ingredients: ["eggs", "spinach", "chili oil", "cottage cheese"],
     steps: [
       "Cook eggs on low-medium heat.",
@@ -107,9 +127,10 @@ const meals: Meal[] = [
     style: "comfort",
     time: "15 min",
     vibe: "easy, cozy, buttery",
+    calories: 560,
     imageUrl:
-      "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Bowl of noodles",
+      "https://source.unsplash.com/900x600/?butter-noodles,parmesan",
+    imageAlt: "Butter noodles with parmesan",
     ingredients: ["noodles", "butter", "pepper", "parmesan"],
     steps: [
       "Boil noodles.",
@@ -125,9 +146,10 @@ const meals: Meal[] = [
     style: "healthy",
     time: "20 min",
     vibe: "clean, filling, meal-prep friendly",
+    calories: 590,
     imageUrl:
-      "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Cooked salmon with vegetables",
+      "https://source.unsplash.com/900x600/?salmon-rice-bowl,avocado",
+    imageAlt: "Salmon rice bowl with avocado",
     ingredients: ["salmon", "rice", "avocado", "lime"],
     steps: [
       "Cook salmon.",
@@ -143,9 +165,9 @@ const meals: Meal[] = [
     style: "balanced",
     time: "18 min",
     vibe: "soft, cozy, simple",
-    imageUrl:
-      "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Simple rice bowl",
+    calories: 470,
+    imageUrl: "https://source.unsplash.com/900x600/?egg-rice-bowl",
+    imageAlt: "Simple egg rice bowl",
     ingredients: ["rice", "egg", "spinach", "butter", "salt"],
     steps: [
       "Warm rice in a pan.",
@@ -161,9 +183,10 @@ const meals: Meal[] = [
     style: "healthy",
     time: "10 min",
     vibe: "fresh, low effort, filling",
+    calories: 510,
     imageUrl:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Healthy avocado salad bowl",
+      "https://source.unsplash.com/900x600/?avocado-rice-bowl,egg",
+    imageAlt: "Avocado rice bowl with egg",
     ingredients: ["avocado", "rice", "lime", "egg", "pepper"],
     steps: [
       "Warm rice or use leftover rice.",
@@ -179,9 +202,10 @@ const meals: Meal[] = [
     style: "comfort",
     time: "18 min",
     vibe: "spicy, garlicky, cozy",
+    calories: 640,
     imageUrl:
-      "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Garlic pasta with parmesan",
+      "https://source.unsplash.com/900x600/?garlic-pasta,chili-oil,parmesan",
+    imageAlt: "Spicy garlic pasta with parmesan",
     ingredients: ["pasta", "garlic", "butter", "chili oil", "parmesan"],
     steps: [
       "Boil pasta.",
@@ -210,6 +234,19 @@ function normalizeTerms(value: string) {
     .split(/[\s,]+/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function readStoredArray<T>(key: string): T[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const stored = window.localStorage.getItem(key);
+    return stored ? (JSON.parse(stored) as T[]) : [];
+  } catch {
+    return [];
+  }
 }
 
 function Pill({
@@ -246,10 +283,16 @@ function Pill({
 
 function MealCard({
   isDarkMode,
+  isSaved,
   meal,
+  onLog,
+  onToggleSaved,
 }: {
   isDarkMode: boolean;
+  isSaved: boolean;
   meal: Meal;
+  onLog: () => void;
+  onToggleSaved: () => void;
 }) {
   return (
     <motion.div
@@ -282,13 +325,23 @@ function MealCard({
             </p>
           </div>
 
-          <div
-            className={cx(
-              "flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-sm",
-              isDarkMode ? "bg-neutral-800" : "bg-neutral-100",
-            )}
-          >
-            <Clock size={14} /> {meal.time}
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <div
+              className={cx(
+                "flex items-center gap-1 rounded-full px-3 py-1 text-sm",
+                isDarkMode ? "bg-neutral-800" : "bg-neutral-100",
+              )}
+            >
+              <Clock size={14} /> {meal.time}
+            </div>
+            <div
+              className={cx(
+                "rounded-full px-3 py-1 text-sm",
+                isDarkMode ? "bg-neutral-800" : "bg-neutral-100",
+              )}
+            >
+              {meal.calories} cal
+            </div>
           </div>
         </div>
 
@@ -302,6 +355,33 @@ function MealCard({
           <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-950">
             {meal.style}
           </span>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onToggleSaved}
+            className={cx(
+              "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition",
+              isSaved
+                ? "border-emerald-500 bg-emerald-100 text-emerald-950"
+                : isDarkMode
+                  ? "border-neutral-700 bg-neutral-950 text-neutral-100 hover:border-neutral-400"
+                  : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400",
+            )}
+          >
+            {isSaved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+            {isSaved ? "Saved" : "Save"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onLog}
+            className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white transition hover:scale-105"
+          >
+            <Plus size={16} />
+            Log meal
+          </button>
         </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
@@ -348,6 +428,169 @@ function MealCard({
   );
 }
 
+function TrackerPanel({
+  isDarkMode,
+  loggedMeals,
+  onClearLog,
+  onRemoveSaved,
+  savedMeals,
+  totalCalories,
+}: {
+  isDarkMode: boolean;
+  loggedMeals: MealLogEntry[];
+  onClearLog: () => void;
+  onRemoveSaved: (mealName: string) => void;
+  savedMeals: Meal[];
+  totalCalories: number;
+}) {
+  return (
+    <section className="mt-8 grid gap-5 lg:grid-cols-3">
+      <div
+        className={cx(
+          "rounded-3xl p-6 shadow-xl",
+          isDarkMode ? "bg-neutral-900" : "bg-white",
+        )}
+      >
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="flex items-center gap-2 text-2xl font-bold">
+            <BookmarkCheck size={22} />
+            Saved recipes
+          </h2>
+          <span
+            className={cx(
+              "rounded-full px-3 py-1 text-sm",
+              isDarkMode ? "bg-neutral-800" : "bg-neutral-100",
+            )}
+          >
+            {savedMeals.length}
+          </span>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {savedMeals.length > 0 ? (
+            savedMeals.map((meal) => (
+              <div
+                key={meal.name}
+                className={cx(
+                  "flex items-center justify-between gap-3 rounded-2xl border p-3",
+                  isDarkMode ? "border-neutral-800" : "border-neutral-200",
+                )}
+              >
+                <div>
+                  <p className="font-semibold">{meal.name}</p>
+                  <p
+                    className={cx(
+                      "text-sm",
+                      isDarkMode ? "text-neutral-400" : "text-neutral-500",
+                    )}
+                  >
+                    {meal.calories} cal · {meal.time}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onRemoveSaved(meal.name)}
+                  className={cx(
+                    "rounded-full p-2 transition",
+                    isDarkMode ? "hover:bg-neutral-800" : "hover:bg-neutral-100",
+                  )}
+                  aria-label={`Remove ${meal.name} from saved recipes`}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <p
+              className={cx(
+                "text-sm",
+                isDarkMode ? "text-neutral-400" : "text-neutral-500",
+              )}
+            >
+              Save a recipe to keep it here.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div
+        className={cx(
+          "rounded-3xl p-6 shadow-xl lg:col-span-2",
+          isDarkMode ? "bg-neutral-900" : "bg-white",
+        )}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="flex items-center gap-2 text-2xl font-bold">
+            <ListChecks size={22} />
+            Recipe log
+          </h2>
+          <div className="flex items-center gap-2">
+            <span
+              className={cx(
+                "rounded-full px-3 py-1 text-sm",
+                isDarkMode ? "bg-neutral-800" : "bg-neutral-100",
+              )}
+            >
+              {totalCalories} cal today
+            </span>
+            {loggedMeals.length > 0 && (
+              <button
+                type="button"
+                onClick={onClearLog}
+                className={cx(
+                  "rounded-full border px-3 py-1 text-sm transition",
+                  isDarkMode
+                    ? "border-neutral-700 hover:border-neutral-400"
+                    : "border-neutral-200 hover:border-neutral-400",
+                )}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {loggedMeals.length > 0 ? (
+            loggedMeals.map((entry) => (
+              <div
+                key={entry.id}
+                className={cx(
+                  "rounded-2xl border p-4",
+                  isDarkMode ? "border-neutral-800" : "border-neutral-200",
+                )}
+              >
+                <p className="font-semibold">{entry.mealName}</p>
+                <p
+                  className={cx(
+                    "mt-1 text-sm",
+                    isDarkMode ? "text-neutral-400" : "text-neutral-500",
+                  )}
+                >
+                  {entry.calories} cal ·{" "}
+                  {new Date(entry.loggedAt).toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p
+              className={cx(
+                "text-sm",
+                isDarkMode ? "text-neutral-400" : "text-neutral-500",
+              )}
+            >
+              Log a meal to start tracking recipes and calories.
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const [mood, setMood] = useState<MoodFilter>("all");
   const [spice, setSpice] = useState<SpiceFilter>("all");
@@ -356,6 +599,24 @@ export default function Home() {
   const [ingredientsInput, setIngredientsInput] = useState("");
   const [featuredMeal, setFeaturedMeal] = useState(meals[0]);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [savedRecipeNames, setSavedRecipeNames] = useState<string[]>([]);
+  const [loggedMeals, setLoggedMeals] = useState<MealLogEntry[]>([]);
+
+  useEffect(() => {
+    setSavedRecipeNames(readStoredArray<string>(savedRecipesKey));
+    setLoggedMeals(readStoredArray<MealLogEntry>(mealLogKey));
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      savedRecipesKey,
+      JSON.stringify(savedRecipeNames),
+    );
+  }, [savedRecipeNames]);
+
+  useEffect(() => {
+    window.localStorage.setItem(mealLogKey, JSON.stringify(loggedMeals));
+  }, [loggedMeals]);
 
   const filteredMeals = useMemo(() => {
     const searchText = query.trim().toLowerCase();
@@ -401,9 +662,39 @@ export default function Home() {
     });
   }, [mood, spice, style, query, ingredientsInput]);
 
+  const savedMeals = useMemo(
+    () => meals.filter((meal) => savedRecipeNames.includes(meal.name)),
+    [savedRecipeNames],
+  );
+
+  const totalCalories = useMemo(
+    () => loggedMeals.reduce((total, meal) => total + meal.calories, 0),
+    [loggedMeals],
+  );
+
   function surpriseMe() {
     const randomMeal = meals[Math.floor(Math.random() * meals.length)];
     setFeaturedMeal(randomMeal);
+  }
+
+  function toggleSavedRecipe(mealName: string) {
+    setSavedRecipeNames((current) =>
+      current.includes(mealName)
+        ? current.filter((name) => name !== mealName)
+        : [...current, mealName],
+    );
+  }
+
+  function logMeal(meal: Meal) {
+    setLoggedMeals((current) => [
+      {
+        id: `${meal.name}-${Date.now()}`,
+        mealName: meal.name,
+        calories: meal.calories,
+        loggedAt: new Date().toISOString(),
+      },
+      ...current,
+    ]);
   }
 
   return (
@@ -478,7 +769,13 @@ export default function Home() {
               <Heart size={16} />
               Today&apos;s pick
             </div>
-            <MealCard meal={featuredMeal} isDarkMode={isDarkMode} />
+            <MealCard
+              meal={featuredMeal}
+              isDarkMode={isDarkMode}
+              isSaved={savedRecipeNames.includes(featuredMeal.name)}
+              onLog={() => logMeal(featuredMeal)}
+              onToggleSaved={() => toggleSavedRecipe(featuredMeal.name)}
+            />
           </div>
         </div>
 
@@ -591,6 +888,15 @@ export default function Home() {
           </div>
         </section>
 
+        <TrackerPanel
+          isDarkMode={isDarkMode}
+          loggedMeals={loggedMeals}
+          onClearLog={() => setLoggedMeals([])}
+          onRemoveSaved={toggleSavedRecipe}
+          savedMeals={savedMeals}
+          totalCalories={totalCalories}
+        />
+
         <section className="mt-8 grid gap-5 lg:grid-cols-2">
           {filteredMeals.length > 0 ? (
             filteredMeals.map((meal) => (
@@ -598,6 +904,9 @@ export default function Home() {
                 key={meal.name}
                 meal={meal}
                 isDarkMode={isDarkMode}
+                isSaved={savedRecipeNames.includes(meal.name)}
+                onLog={() => logMeal(meal)}
+                onToggleSaved={() => toggleSavedRecipe(meal.name)}
               />
             ))
           ) : (
