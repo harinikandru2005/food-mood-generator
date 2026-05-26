@@ -8,6 +8,7 @@ import {
   Flame,
   Heart,
   ListChecks,
+  Lock,
   LogOut,
   Moon,
   Plus,
@@ -18,6 +19,7 @@ import {
   Soup,
   Sparkles,
   Sun,
+  Target,
   Trash2,
   User,
 } from "lucide-react";
@@ -46,6 +48,8 @@ type MealLogEntry = {
 const savedRecipesKey = "midnight-meals-saved-recipes";
 const mealLogKey = "midnight-meals-recipe-log";
 const userNameKey = "midnight-meals-user-name";
+const userPasswordKey = "midnight-meals-user-password";
+const calorieGoalKey = "midnight-meals-calorie-goal";
 
 const meals: Meal[] = [
   {
@@ -217,6 +221,120 @@ const meals: Meal[] = [
       "Cook garlic in butter.",
       "Add chili oil.",
       "Mix pasta in and top with parmesan.",
+    ],
+  },
+  {
+    name: "Greek Yogurt Berry Bowl",
+    mood: "productive",
+    spice: "mild",
+    style: "healthy",
+    time: "5 min",
+    vibe: "fresh, sweet, protein-packed",
+    calories: 320,
+    imageUrl:
+      "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Greek yogurt bowl with berries",
+    ingredients: ["greek yogurt", "berries", "granola", "honey", "chia seeds"],
+    steps: [
+      "Spoon Greek yogurt into a bowl.",
+      "Add berries and granola.",
+      "Drizzle with honey.",
+      "Finish with chia seeds.",
+    ],
+  },
+  {
+    name: "Chicken Avocado Wrap",
+    mood: "productive",
+    spice: "medium",
+    style: "balanced",
+    time: "15 min",
+    vibe: "portable, filling, lunch-ready",
+    calories: 540,
+    imageUrl:
+      "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Chicken wrap with vegetables",
+    ingredients: ["tortilla", "chicken", "avocado", "lettuce", "hot sauce"],
+    steps: [
+      "Warm the tortilla.",
+      "Layer chicken, avocado, and lettuce.",
+      "Add hot sauce or dressing.",
+      "Roll tightly and slice.",
+    ],
+  },
+  {
+    name: "Cozy Lentil Soup",
+    mood: "comfort",
+    spice: "mild",
+    style: "healthy",
+    time: "25 min",
+    vibe: "warm, nourishing, simple",
+    calories: 410,
+    imageUrl:
+      "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Bowl of lentil soup",
+    ingredients: ["lentils", "carrots", "broth", "onion", "garlic"],
+    steps: [
+      "Cook onion and garlic until soft.",
+      "Add carrots, lentils, and broth.",
+      "Simmer until lentils are tender.",
+      "Season and serve warm.",
+    ],
+  },
+  {
+    name: "Spicy Tuna Cucumber Bowl",
+    mood: "lazy",
+    spice: "spicy",
+    style: "healthy",
+    time: "10 min",
+    vibe: "crunchy, spicy, no-cook",
+    calories: 360,
+    imageUrl:
+      "https://images.unsplash.com/photo-1563612116625-3012372fccce?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Tuna bowl with cucumber",
+    ingredients: ["tuna", "cucumber", "rice", "sriracha", "mayo"],
+    steps: [
+      "Mix tuna with sriracha and a little mayo.",
+      "Slice cucumber.",
+      "Add tuna over rice.",
+      "Top with cucumber and extra sauce.",
+    ],
+  },
+  {
+    name: "Pesto Chickpea Pasta",
+    mood: "comfort",
+    spice: "mild",
+    style: "balanced",
+    time: "18 min",
+    vibe: "herby, satisfying, pantry-friendly",
+    calories: 580,
+    imageUrl:
+      "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Pesto pasta with chickpeas",
+    ingredients: ["pasta", "pesto", "chickpeas", "spinach", "parmesan"],
+    steps: [
+      "Boil pasta and save some pasta water.",
+      "Warm chickpeas and spinach in a pan.",
+      "Stir in pesto and pasta.",
+      "Loosen with pasta water and top with parmesan.",
+    ],
+  },
+  {
+    name: "Peanut Tofu Rice Bowl",
+    mood: "productive",
+    spice: "medium",
+    style: "healthy",
+    time: "20 min",
+    vibe: "saucy, plant-based, filling",
+    calories: 620,
+    imageUrl:
+      "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Tofu rice bowl with vegetables",
+    ingredients: ["tofu", "rice", "peanut sauce", "broccoli", "lime"],
+    steps: [
+      "Crisp tofu in a pan.",
+      "Steam or saute broccoli.",
+      "Warm rice.",
+      "Top with peanut sauce and lime.",
     ],
   },
 ];
@@ -447,6 +565,7 @@ function MealCard({
 }
 
 function TrackerPanel({
+  calorieGoal,
   isDarkMode,
   loggedMeals,
   onClearLog,
@@ -454,6 +573,7 @@ function TrackerPanel({
   savedMeals,
   totalCalories,
 }: {
+  calorieGoal: number;
   isDarkMode: boolean;
   loggedMeals: MealLogEntry[];
   onClearLog: () => void;
@@ -461,6 +581,9 @@ function TrackerPanel({
   savedMeals: Meal[];
   totalCalories: number;
 }) {
+  const remainingCalories = Math.max(calorieGoal - totalCalories, 0);
+  const progress = Math.min(Math.round((totalCalories / calorieGoal) * 100), 100);
+
   return (
     <section className="mt-8 grid gap-5 lg:grid-cols-3">
       <div
@@ -568,6 +691,39 @@ function TrackerPanel({
           </div>
         </div>
 
+        <div
+          className={cx(
+            "mt-4 rounded-2xl border p-4",
+            isDarkMode ? "border-neutral-800" : "border-neutral-200",
+          )}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="flex items-center gap-2 font-semibold">
+              <Target size={18} />
+              Daily goal
+            </p>
+            <p
+              className={cx(
+                "text-sm",
+                isDarkMode ? "text-neutral-400" : "text-neutral-500",
+              )}
+            >
+              Approx {remainingCalories} cal left of {calorieGoal}
+            </p>
+          </div>
+          <div
+            className={cx(
+              "mt-3 h-3 overflow-hidden rounded-full",
+              isDarkMode ? "bg-neutral-800" : "bg-neutral-100",
+            )}
+          >
+            <div
+              className="h-full rounded-full bg-emerald-500 transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {loggedMeals.length > 0 ? (
             loggedMeals.map((entry) => (
@@ -610,17 +766,27 @@ function TrackerPanel({
 }
 
 function LoginPage({
+  calorieGoalInput,
+  loginError,
   isDarkMode,
   loginInput,
   onLogin,
+  onCalorieGoalInputChange,
   onLoginInputChange,
+  onPasswordInputChange,
   onToggleDarkMode,
+  passwordInput,
 }: {
+  calorieGoalInput: string;
+  loginError: string;
   isDarkMode: boolean;
   loginInput: string;
   onLogin: () => void;
+  onCalorieGoalInputChange: (value: string) => void;
   onLoginInputChange: (value: string) => void;
+  onPasswordInputChange: (value: string) => void;
   onToggleDarkMode: () => void;
+  passwordInput: string;
 }) {
   return (
     <main
@@ -665,8 +831,8 @@ function LoginPage({
             isDarkMode ? "text-neutral-300" : "text-neutral-600",
           )}
         >
-          Sign in with your name to save recipes, log past meals, and track
-          approximate calories.
+          Sign in with your name and password to save recipes, log past meals,
+          set goals, and track approximate calories.
         </p>
 
         <form
@@ -694,6 +860,53 @@ function LoginPage({
             />
           </div>
 
+          <div className="relative">
+            <Lock
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+              size={18}
+            />
+            <input
+              value={passwordInput}
+              onChange={(event) => onPasswordInputChange(event.target.value)}
+              placeholder="Password"
+              type="password"
+              className={cx(
+                "w-full rounded-full border py-3 pl-10 pr-4 outline-none focus:border-neutral-500",
+                isDarkMode
+                  ? "border-neutral-700 bg-neutral-950 text-neutral-50 placeholder:text-neutral-500"
+                  : "border-neutral-200 bg-white",
+              )}
+            />
+          </div>
+
+          <div className="relative">
+            <Target
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+              size={18}
+            />
+            <input
+              value={calorieGoalInput}
+              onChange={(event) =>
+                onCalorieGoalInputChange(event.target.value)
+              }
+              placeholder="Daily calorie goal"
+              type="number"
+              min="1"
+              className={cx(
+                "w-full rounded-full border py-3 pl-10 pr-4 outline-none focus:border-neutral-500",
+                isDarkMode
+                  ? "border-neutral-700 bg-neutral-950 text-neutral-50 placeholder:text-neutral-500"
+                  : "border-neutral-200 bg-white",
+              )}
+            />
+          </div>
+
+          {loginError && (
+            <p className="rounded-2xl bg-rose-100 px-4 py-3 text-sm text-rose-950">
+              {loginError}
+            </p>
+          )}
+
           <button
             type="submit"
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-white shadow transition hover:scale-105"
@@ -715,7 +928,12 @@ export default function Home() {
   const [ingredientsInput, setIngredientsInput] = useState("");
   const [featuredMeal, setFeaturedMeal] = useState(meals[0]);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [calorieGoal, setCalorieGoal] = useState(2000);
+  const [calorieGoalInput, setCalorieGoalInput] = useState("2000");
+  const [loginError, setLoginError] = useState("");
   const [loginInput, setLoginInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [storageLoaded, setStorageLoaded] = useState(false);
   const [userName, setUserName] = useState("");
   const [recentlyLoggedMeal, setRecentlyLoggedMeal] = useState("");
   const [recentlySavedRecipe, setRecentlySavedRecipe] = useState("");
@@ -726,23 +944,42 @@ export default function Home() {
     setSavedRecipeNames(readStoredArray<string>(savedRecipesKey));
     setLoggedMeals(readStoredArray<MealLogEntry>(mealLogKey));
     const storedUserName = window.localStorage.getItem(userNameKey);
+    const storedGoal = window.localStorage.getItem(calorieGoalKey);
 
     if (storedUserName) {
-      setUserName(storedUserName);
       setLoginInput(storedUserName);
     }
+
+    if (storedGoal) {
+      const nextGoal = Number(storedGoal);
+
+      if (Number.isFinite(nextGoal) && nextGoal > 0) {
+        setCalorieGoal(nextGoal);
+        setCalorieGoalInput(String(nextGoal));
+      }
+    }
+
+    setStorageLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!storageLoaded) {
+      return;
+    }
+
     window.localStorage.setItem(
       savedRecipesKey,
       JSON.stringify(savedRecipeNames),
     );
-  }, [savedRecipeNames]);
+  }, [savedRecipeNames, storageLoaded]);
 
   useEffect(() => {
+    if (!storageLoaded) {
+      return;
+    }
+
     window.localStorage.setItem(mealLogKey, JSON.stringify(loggedMeals));
-  }, [loggedMeals]);
+  }, [loggedMeals, storageLoaded]);
 
   const filteredMeals = useMemo(() => {
     const searchText = query.trim().toLowerCase();
@@ -834,29 +1071,58 @@ export default function Home() {
 
   function login() {
     const nextUserName = loginInput.trim();
+    const nextPassword = passwordInput.trim();
+    const nextGoal = Number(calorieGoalInput);
+    const storedPassword = window.localStorage.getItem(userPasswordKey);
 
     if (!nextUserName) {
+      setLoginError("Enter your name to continue.");
       return;
     }
 
+    if (!nextPassword) {
+      setLoginError("Enter a password to continue.");
+      return;
+    }
+
+    if (!Number.isFinite(nextGoal) || nextGoal <= 0) {
+      setLoginError("Enter a daily calorie goal above 0.");
+      return;
+    }
+
+    if (storedPassword && storedPassword !== nextPassword) {
+      setLoginError("That password does not match this browser login.");
+      return;
+    }
+
+    setLoginError("");
     setUserName(nextUserName);
+    setCalorieGoal(nextGoal);
     window.localStorage.setItem(userNameKey, nextUserName);
+    window.localStorage.setItem(userPasswordKey, nextPassword);
+    window.localStorage.setItem(calorieGoalKey, String(nextGoal));
   }
 
   function logout() {
     setUserName("");
     setLoginInput("");
+    setPasswordInput("");
     window.localStorage.removeItem(userNameKey);
   }
 
   if (!userName) {
     return (
       <LoginPage
+        calorieGoalInput={calorieGoalInput}
+        loginError={loginError}
         isDarkMode={isDarkMode}
         loginInput={loginInput}
         onLogin={login}
+        onCalorieGoalInputChange={setCalorieGoalInput}
         onLoginInputChange={setLoginInput}
+        onPasswordInputChange={setPasswordInput}
         onToggleDarkMode={() => setIsDarkMode((current) => !current)}
+        passwordInput={passwordInput}
       />
     );
   }
@@ -1079,6 +1345,7 @@ export default function Home() {
         </section>
 
         <TrackerPanel
+          calorieGoal={calorieGoal}
           isDarkMode={isDarkMode}
           loggedMeals={loggedMeals}
           onClearLog={() => setLoggedMeals([])}
