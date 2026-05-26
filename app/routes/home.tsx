@@ -53,7 +53,7 @@ const meals: Meal[] = [
     vibe: "warm, quick, comforting",
     calories: 520,
     imageUrl:
-      "https://source.unsplash.com/900x600/?egg-rice-bowl,spinach,chili-oil",
+      "https://unsplash.com/photos/IlJhW2ScTqw/download?force=true&w=900",
     imageAlt: "Spicy egg rice bowl with greens",
     ingredients: ["rice", "eggs", "chili oil", "spinach", "soy sauce"],
     steps: [
@@ -72,7 +72,7 @@ const meals: Meal[] = [
     vibe: "clean, filling, cafe-style",
     calories: 430,
     imageUrl:
-      "https://source.unsplash.com/900x600/?salmon-avocado-toast,open-sandwich",
+      "https://unsplash.com/photos/pqLvZPEBrGU/download?force=true&w=900",
     imageAlt: "Avocado toast topped with salmon",
     ingredients: ["toast", "avocado", "salmon", "lime", "pepper"],
     steps: [
@@ -91,7 +91,7 @@ const meals: Meal[] = [
     vibe: "cozy, creamy, dinner energy",
     calories: 610,
     imageUrl:
-      "https://source.unsplash.com/900x600/?creamy-tomato-pasta,bowl",
+      "https://unsplash.com/photos/TmJPvlcfn_0/download?force=true&w=900",
     imageAlt: "Creamy tomato pasta in a bowl",
     ingredients: ["pasta", "tomato", "cream cheese", "butter", "pepper"],
     steps: [
@@ -110,7 +110,7 @@ const meals: Meal[] = [
     vibe: "high-protein, quick, spicy",
     calories: 390,
     imageUrl:
-      "https://source.unsplash.com/900x600/?egg-breakfast-bowl,spinach",
+      "https://unsplash.com/photos/oROd_EB2vD8/download?force=true&w=900",
     imageAlt: "High protein egg bowl with spinach",
     ingredients: ["eggs", "spinach", "chili oil", "cottage cheese"],
     steps: [
@@ -129,7 +129,7 @@ const meals: Meal[] = [
     vibe: "easy, cozy, buttery",
     calories: 560,
     imageUrl:
-      "https://source.unsplash.com/900x600/?butter-noodles,parmesan",
+      "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Butter noodles with parmesan",
     ingredients: ["noodles", "butter", "pepper", "parmesan"],
     steps: [
@@ -148,7 +148,7 @@ const meals: Meal[] = [
     vibe: "clean, filling, meal-prep friendly",
     calories: 590,
     imageUrl:
-      "https://source.unsplash.com/900x600/?salmon-rice-bowl,avocado",
+      "https://unsplash.com/photos/Mwtmk37_0S4/download?force=true&w=900",
     imageAlt: "Salmon rice bowl with avocado",
     ingredients: ["salmon", "rice", "avocado", "lime"],
     steps: [
@@ -166,7 +166,8 @@ const meals: Meal[] = [
     time: "18 min",
     vibe: "soft, cozy, simple",
     calories: 470,
-    imageUrl: "https://source.unsplash.com/900x600/?egg-rice-bowl",
+    imageUrl:
+      "https://unsplash.com/photos/IlJhW2ScTqw/download?force=true&w=900",
     imageAlt: "Simple egg rice bowl",
     ingredients: ["rice", "egg", "spinach", "butter", "salt"],
     steps: [
@@ -185,7 +186,7 @@ const meals: Meal[] = [
     vibe: "fresh, low effort, filling",
     calories: 510,
     imageUrl:
-      "https://source.unsplash.com/900x600/?avocado-rice-bowl,egg",
+      "https://unsplash.com/photos/rNriCVGMVgQ/download?force=true&w=900",
     imageAlt: "Avocado rice bowl with egg",
     ingredients: ["avocado", "rice", "lime", "egg", "pepper"],
     steps: [
@@ -204,7 +205,7 @@ const meals: Meal[] = [
     vibe: "spicy, garlicky, cozy",
     calories: 640,
     imageUrl:
-      "https://source.unsplash.com/900x600/?garlic-pasta,chili-oil,parmesan",
+      "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Spicy garlic pasta with parmesan",
     ingredients: ["pasta", "garlic", "butter", "chili oil", "parmesan"],
     steps: [
