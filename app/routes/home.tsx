@@ -341,7 +341,7 @@ function MealCard({
                 isDarkMode ? "bg-neutral-800" : "bg-neutral-100",
               )}
             >
-              {meal.calories} cal
+              Approx {meal.calories} cal
             </div>
           </div>
         </div>
@@ -381,7 +381,7 @@ function MealCard({
             className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white transition hover:scale-105"
           >
             <Plus size={16} />
-            Log meal
+            Log recipe
           </button>
         </div>
 
@@ -485,7 +485,7 @@ function TrackerPanel({
                       isDarkMode ? "text-neutral-400" : "text-neutral-500",
                     )}
                   >
-                    {meal.calories} cal · {meal.time}
+                    Approx {meal.calories} cal | {meal.time}
                   </p>
                 </div>
                 <button
@@ -523,7 +523,7 @@ function TrackerPanel({
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h2 className="flex items-center gap-2 text-2xl font-bold">
             <ListChecks size={22} />
-            Recipe log
+            Past recipes
           </h2>
           <div className="flex items-center gap-2">
             <span
@@ -532,7 +532,7 @@ function TrackerPanel({
                 isDarkMode ? "bg-neutral-800" : "bg-neutral-100",
               )}
             >
-              {totalCalories} cal today
+              Approx {totalCalories} cal today
             </span>
             {loggedMeals.length > 0 && (
               <button
@@ -568,7 +568,7 @@ function TrackerPanel({
                     isDarkMode ? "text-neutral-400" : "text-neutral-500",
                   )}
                 >
-                  {entry.calories} cal ·{" "}
+                  Approx {entry.calories} cal |{" "}
                   {new Date(entry.loggedAt).toLocaleTimeString([], {
                     hour: "numeric",
                     minute: "2-digit",
@@ -583,7 +583,7 @@ function TrackerPanel({
                 isDarkMode ? "text-neutral-400" : "text-neutral-500",
               )}
             >
-              Log a meal to start tracking recipes and calories.
+              Log a recipe to start tracking past recipes and approx calories.
             </p>
           )}
         </div>
