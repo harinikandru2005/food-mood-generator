@@ -3,10 +3,12 @@ import { motion } from "framer-motion";
 import {
   Bookmark,
   BookmarkCheck,
+  Check,
   Clock,
   Flame,
   Heart,
   ListChecks,
+  LogOut,
   Moon,
   Plus,
   Salad,
@@ -17,6 +19,7 @@ import {
   Sparkles,
   Sun,
   Trash2,
+  User,
 } from "lucide-react";
 
 type Meal = {
@@ -42,6 +45,7 @@ type MealLogEntry = {
 
 const savedRecipesKey = "midnight-meals-saved-recipes";
 const mealLogKey = "midnight-meals-recipe-log";
+const userNameKey = "midnight-meals-user-name";
 
 const meals: Meal[] = [
   {
@@ -285,12 +289,16 @@ function Pill({
 function MealCard({
   isDarkMode,
   isSaved,
+  isRecentlyLogged,
+  isRecentlySaved,
   meal,
   onLog,
   onToggleSaved,
 }: {
   isDarkMode: boolean;
   isSaved: boolean;
+  isRecentlyLogged: boolean;
+  isRecentlySaved: boolean;
   meal: Meal;
   onLog: () => void;
   onToggleSaved: () => void;
@@ -371,17 +379,26 @@ function MealCard({
                   : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400",
             )}
           >
-            {isSaved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
-            {isSaved ? "Saved" : "Save"}
+            {isRecentlySaved ? (
+              <Check size={16} />
+            ) : isSaved ? (
+              <BookmarkCheck size={16} />
+            ) : (
+              <Bookmark size={16} />
+            )}
+            {isRecentlySaved ? "Recipe saved" : isSaved ? "Saved" : "Save"}
           </button>
 
           <button
             type="button"
             onClick={onLog}
-            className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white transition hover:scale-105"
+            className={cx(
+              "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-white transition hover:scale-105",
+              isRecentlyLogged ? "bg-emerald-600" : "bg-black",
+            )}
           >
-            <Plus size={16} />
-            Log recipe
+            {isRecentlyLogged ? <Check size={16} /> : <Plus size={16} />}
+            {isRecentlyLogged ? "Meal added" : "Log recipe"}
           </button>
         </div>
 
@@ -592,6 +609,104 @@ function TrackerPanel({
   );
 }
 
+function LoginPage({
+  isDarkMode,
+  loginInput,
+  onLogin,
+  onLoginInputChange,
+  onToggleDarkMode,
+}: {
+  isDarkMode: boolean;
+  loginInput: string;
+  onLogin: () => void;
+  onLoginInputChange: (value: string) => void;
+  onToggleDarkMode: () => void;
+}) {
+  return (
+    <main
+      className={cx(
+        "flex min-h-screen items-center justify-center p-6 transition-colors",
+        isDarkMode
+          ? "bg-neutral-950 text-neutral-50"
+          : "bg-orange-50 text-neutral-900",
+      )}
+    >
+      <section
+        className={cx(
+          "w-full max-w-md rounded-3xl p-6 shadow-xl",
+          isDarkMode ? "bg-neutral-900" : "bg-white",
+        )}
+      >
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="inline-flex items-center gap-2 rounded-full text-sm font-semibold">
+            <Sparkles size={16} />
+            Midnight Meals
+          </div>
+
+          <button
+            type="button"
+            onClick={onToggleDarkMode}
+            className={cx(
+              "inline-flex h-10 w-10 items-center justify-center rounded-full border transition",
+              isDarkMode
+                ? "border-neutral-700 bg-neutral-900 text-yellow-200 hover:border-neutral-400"
+                : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-400",
+            )}
+            aria-label="Toggle dark mode"
+          >
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
+
+        <h1 className="text-4xl font-bold leading-tight">Welcome back</h1>
+        <p
+          className={cx(
+            "mt-3",
+            isDarkMode ? "text-neutral-300" : "text-neutral-600",
+          )}
+        >
+          Sign in with your name to save recipes, log past meals, and track
+          approximate calories.
+        </p>
+
+        <form
+          className="mt-6 space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onLogin();
+          }}
+        >
+          <div className="relative">
+            <User
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+              size={18}
+            />
+            <input
+              value={loginInput}
+              onChange={(event) => onLoginInputChange(event.target.value)}
+              placeholder="Your name"
+              className={cx(
+                "w-full rounded-full border py-3 pl-10 pr-4 outline-none focus:border-neutral-500",
+                isDarkMode
+                  ? "border-neutral-700 bg-neutral-950 text-neutral-50 placeholder:text-neutral-500"
+                  : "border-neutral-200 bg-white",
+              )}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-white shadow transition hover:scale-105"
+          >
+            <User size={18} />
+            Enter meal tracker
+          </button>
+        </form>
+      </section>
+    </main>
+  );
+}
+
 export default function Home() {
   const [mood, setMood] = useState<MoodFilter>("all");
   const [spice, setSpice] = useState<SpiceFilter>("all");
@@ -600,12 +715,22 @@ export default function Home() {
   const [ingredientsInput, setIngredientsInput] = useState("");
   const [featuredMeal, setFeaturedMeal] = useState(meals[0]);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [loginInput, setLoginInput] = useState("");
+  const [userName, setUserName] = useState("");
+  const [recentlyLoggedMeal, setRecentlyLoggedMeal] = useState("");
+  const [recentlySavedRecipe, setRecentlySavedRecipe] = useState("");
   const [savedRecipeNames, setSavedRecipeNames] = useState<string[]>([]);
   const [loggedMeals, setLoggedMeals] = useState<MealLogEntry[]>([]);
 
   useEffect(() => {
     setSavedRecipeNames(readStoredArray<string>(savedRecipesKey));
     setLoggedMeals(readStoredArray<MealLogEntry>(mealLogKey));
+    const storedUserName = window.localStorage.getItem(userNameKey);
+
+    if (storedUserName) {
+      setUserName(storedUserName);
+      setLoginInput(storedUserName);
+    }
   }, []);
 
   useEffect(() => {
@@ -679,14 +804,23 @@ export default function Home() {
   }
 
   function toggleSavedRecipe(mealName: string) {
+    const willSave = !savedRecipeNames.includes(mealName);
+
     setSavedRecipeNames((current) =>
       current.includes(mealName)
         ? current.filter((name) => name !== mealName)
         : [...current, mealName],
     );
+
+    if (willSave) {
+      setRecentlySavedRecipe(mealName);
+      window.setTimeout(() => setRecentlySavedRecipe(""), 1400);
+    }
   }
 
   function logMeal(meal: Meal) {
+    setRecentlyLoggedMeal(meal.name);
+    window.setTimeout(() => setRecentlyLoggedMeal(""), 1400);
     setLoggedMeals((current) => [
       {
         id: `${meal.name}-${Date.now()}`,
@@ -696,6 +830,35 @@ export default function Home() {
       },
       ...current,
     ]);
+  }
+
+  function login() {
+    const nextUserName = loginInput.trim();
+
+    if (!nextUserName) {
+      return;
+    }
+
+    setUserName(nextUserName);
+    window.localStorage.setItem(userNameKey, nextUserName);
+  }
+
+  function logout() {
+    setUserName("");
+    setLoginInput("");
+    window.localStorage.removeItem(userNameKey);
+  }
+
+  if (!userName) {
+    return (
+      <LoginPage
+        isDarkMode={isDarkMode}
+        loginInput={loginInput}
+        onLogin={login}
+        onLoginInputChange={setLoginInput}
+        onToggleDarkMode={() => setIsDarkMode((current) => !current)}
+      />
+    );
   }
 
   return (
@@ -733,6 +896,30 @@ export default function Home() {
                 aria-label="Toggle dark mode"
               >
                 {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+
+              <div
+                className={cx(
+                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm shadow",
+                  isDarkMode ? "bg-neutral-900" : "bg-white",
+                )}
+              >
+                <User size={16} />
+                {userName}
+              </div>
+
+              <button
+                type="button"
+                onClick={logout}
+                className={cx(
+                  "inline-flex h-10 w-10 items-center justify-center rounded-full border transition",
+                  isDarkMode
+                    ? "border-neutral-700 bg-neutral-900 text-neutral-200 hover:border-neutral-400"
+                    : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-400",
+                )}
+                aria-label="Sign out"
+              >
+                <LogOut size={18} />
               </button>
             </div>
 
@@ -774,6 +961,8 @@ export default function Home() {
               meal={featuredMeal}
               isDarkMode={isDarkMode}
               isSaved={savedRecipeNames.includes(featuredMeal.name)}
+              isRecentlyLogged={recentlyLoggedMeal === featuredMeal.name}
+              isRecentlySaved={recentlySavedRecipe === featuredMeal.name}
               onLog={() => logMeal(featuredMeal)}
               onToggleSaved={() => toggleSavedRecipe(featuredMeal.name)}
             />
@@ -906,6 +1095,8 @@ export default function Home() {
                 meal={meal}
                 isDarkMode={isDarkMode}
                 isSaved={savedRecipeNames.includes(meal.name)}
+                isRecentlyLogged={recentlyLoggedMeal === meal.name}
+                isRecentlySaved={recentlySavedRecipe === meal.name}
                 onLog={() => logMeal(meal)}
                 onToggleSaved={() => toggleSavedRecipe(meal.name)}
               />
