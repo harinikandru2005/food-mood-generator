@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import {
   Bookmark,
   BookmarkCheck,
-  Brain,
   Check,
   Clock,
   Dumbbell,
@@ -652,7 +651,7 @@ function MealCard({
           <div className="flex shrink-0 flex-col items-end gap-2">
             {typeof aiScore === "number" && (
               <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-950">
-                <Brain size={14} /> {aiScore}% AI match
+                <Sparkles size={14} /> {aiScore}% recommended
               </div>
             )}
             <div
@@ -682,8 +681,8 @@ function MealCard({
             )}
           >
             <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
-              <Brain size={16} />
-              Why it matched
+              <Sparkles size={16} />
+              Why recommended
             </p>
             <ul
               className={cx(
@@ -1029,8 +1028,8 @@ function AIRecommendationPanel({
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-950">
-            <Brain size={16} />
-            AI recommendation engine
+            <Sparkles size={16} />
+            Recommended for you
           </div>
           <h2 className="text-3xl font-bold">{recommendation.meal.name}</h2>
           <p
@@ -1039,8 +1038,8 @@ function AIRecommendationPanel({
               isDarkMode ? "text-neutral-300" : "text-neutral-600",
             )}
           >
-            Ranked from the recipe database using mood, pantry matches, goal
-            tags, protein, prep effort, and remaining calories.
+            Chosen from the recipe database using your mood, pantry matches,
+            goals, protein, prep effort, and remaining calories.
           </p>
         </div>
 
@@ -1052,7 +1051,7 @@ function AIRecommendationPanel({
         >
           <p className="flex items-center gap-2 text-sm font-semibold">
             <Target size={16} />
-            Goal model
+            Recommendation score
           </p>
           <p className="mt-2 text-3xl font-bold">{recommendation.score}%</p>
           <p
